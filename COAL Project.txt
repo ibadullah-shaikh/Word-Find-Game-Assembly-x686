@@ -1,0 +1,237 @@
+INCLUDE Irvine32.inc
+
+.data
+arr BYTE "ABCDEFGHIJKLMNOPQRSTUVWXYZ",0
+ans BYTE 20 DUP(?)
+pos1 BYTE 20 DUP(?)
+pos2 BYTE 20 DUP(?)
+row BYTE 2
+col BYTE 20
+temprow BYTE 2
+tempcol BYTE 20
+str1	BYTE "--------- Assume a Word --------- ",0ah,0dh,0ah,0dh,"                                 Step 01 : ",0ah,0dh,"                      ==============================",0ah,0dh,"                                 Table 01 : ",0
+str11	BYTE "--------- Assume a Word --------- ",0ah,0dh,0ah,0dh,"                                 Step 02 : ",0ah,0dh,"                      ==============================",0ah,0dh,"                                 Table 02 : ",0
+str2	BYTE "Enter Total Number of Alphabets in Your Word : ",0
+str3	BYTE "Enter Column Number of Letter # ",0
+str4    BYTE " : ",0
+space   BYTE "                                                                                    ",0
+str5	BYTE "Surprise !!! Your Word Is = ",0
+k       BYTE 1
+i    BYTE 5
+j    BYTE 0
+wcount BYTE ?
+
+.code
+main PROC
+mov DH,row
+mov DL,col
+
+call gotoxy
+mov edx,OFFSET str1
+call WriteString
+call CRLF
+add row,6
+add col,8
+mov DH,row
+mov DL,col
+movzx ecx,i
+mov eax,1
+L1:                       ;Printing Column Numbers of Table 1
+	call gotoxy
+	call WriteDec
+	add DL,4
+	inc eax
+Loop L1
+
+mov DL,col
+movzx eax,col
+mov tempcol,al
+add row,2
+mov DH,row
+mov ecx,30
+mov esi,OFFSET arr
+L2:                            ; Printing Table 01
+	Call gotoxy
+	mov eax,[esi]
+	Call WriteChar
+	inc esi
+	add DL,4
+	cmp DL,48
+	JE L3
+	 JMP L4
+L3:
+	mov DL,col
+	add DH,2
+	mov row,DH
+L4:
+Loop L2
+
+add row,2
+mov DH,row
+sub col,15
+mov DL,col
+call gotoxy
+mov edx,OFFSET str2
+Call WriteString
+
+call Readint 
+mov wcount,al
+                 
+mov DH,row							; Clear Previous Line 
+mov DL,col
+call gotoxy
+mov edx,OFFSET space
+Call WriteString
+
+add col,5
+mov DH,row
+mov DL,col
+call gotoxy
+mov edx,OFFSET str3
+Call WriteString
+
+mov esi,OFFSET pos1
+movzx ecx,wcount         ; taking column number as an input from user
+L16:
+	mov DH,row
+	mov DL,col
+	call gotoxy
+	mov edx,OFFSET space
+	Call WriteString
+	mov DH,row
+	mov DL,col
+	call gotoxy
+	mov edx,OFFSET str3
+	Call WriteString
+	movzx eax,k
+	call WriteDec
+	inc k
+	mov  edx,OFFSET str4
+	Call WriteString
+	Call ReadInt
+	dec eax
+	mov [esi],eax
+	inc esi
+Loop L16
+
+call Clrscr
+
+movzx eax,temprow
+mov row,al
+sub tempcol,7
+movzx eax,tempcol
+mov col,al
+mov DH,row
+mov Dl,col
+
+call gotoxy
+mov edx,OFFSET str11
+call WriteString
+
+add row,6
+add col,7
+mov DH,row
+mov Dl,col
+mov tempcol,DL
+mov ecx,6
+mov eax,1
+L6:                     ;Printing Column Numbers of Table 2
+	call gotoxy
+	call WriteDec
+	add DL,4
+	inc eax
+Loop L6
+call crlf
+
+add row,2
+mov DH,row
+mov DL,col
+mov edi,0
+mov esi,0
+movzx ecx,wcount
+L7:                                   ; Printing Table 02
+	movzx edi,pos1[esi*type pos1]
+	push ecx
+	mov ecx,6
+	L8:
+		Call Gotoxy
+		mov al,arr[edi*type arr]
+		call writechar
+		add edi,5
+		add DL,4
+	loop L8
+	pop ecx
+	call crlf
+	inc esi
+	add row,2
+	mov DH,row
+	mov DL,tempcol
+Loop L7
+
+mov DH,row							; Clear Previous Line 
+mov DL,col
+call gotoxy
+mov edx,OFFSET space
+Call WriteString
+
+add row,2
+sub col ,5
+mov DH,row
+mov DL,col
+call gotoxy
+mov edx,OFFSET str3
+Call WriteString
+
+mov k,1
+mov esi,OFFSET pos2
+movzx ecx,wcount         ; taking column number as an input from user
+L9:
+	mov DH,row
+	mov DL,col
+	call gotoxy
+	mov edx,OFFSET space
+	Call WriteString
+	mov DH,row
+	mov DL,col
+	call gotoxy
+	mov edx,OFFSET str3
+	Call WriteString
+	movzx eax,k
+	call WriteDec
+	inc k
+	mov  edx,OFFSET str4
+	Call WriteString
+	Call ReadInt
+	dec eax
+	mov [esi],eax
+	inc esi
+Loop L9
+
+movzx ecx,wcount
+mov esi,0
+L10:                                 ; Getting the Word 
+	movzx eax,pos2[esi*type pos2]
+	mov ebx,5
+	mul ebx
+	mov edx,0
+	mov dl,pos1[esi*type pos1]
+	add eax,edx
+	mov al,arr[eax]
+	mov ans[esi],al
+	inc esi
+Loop L10
+
+call Clrscr
+mov DH,15
+Mov Dl,10
+Call Gotoxy
+mov edx,OFFSET str5
+Call WriteString
+mov edx,OFFSET ans
+Call WriteString
+mov DH,30
+Mov Dl,10
+Call Gotoxy 
+exit
+main endp
+end main
